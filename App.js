@@ -1,21 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useFonts } from 'expo-font';
+
+import Login from './screens/Login/Login';
+import Home from './screens/Home/Home';
+import QRScanner from './screens/QRScanner/QRScanner';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+	const [loaded] = useFonts({
+		Quicksand: require('./assets/fonts/Quicksand-Regular.ttf'),
+	});
+	
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+	if (!loaded) {
+		return null;
+	}
+	
+	return (
+		<NavigationContainer>
+			<Stack.Navigator>
+				<Stack.Screen
+					name="Login"
+					component={Login}
+					options={{headerShown: false}}
+				/>
+				<Stack.Screen
+					name="Home"
+					component={Home}
+					options={{headerShown: false}}
+				/>
+				<Stack.Screen
+					name="QRScanner"
+					component={QRScanner}
+					options={{headerShown: false}}
+				/>
+			</Stack.Navigator>
+		</NavigationContainer>
+	);
+}
