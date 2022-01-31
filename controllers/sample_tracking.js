@@ -2,7 +2,7 @@ import Authentication from './authentication';
 import Fetch from './fetch';
 
 export default class SampleTracking {
-    sampleCollected = (location, containerId, pointId) => {
+    sampleCollected = (location, containerId, pointId, additionalData) => {
         return new Promise((resolve, reject) => { 
             var data = {
                 "containerId": containerId,
@@ -13,6 +13,10 @@ export default class SampleTracking {
                         location.coords.latitude
                     ]
                 }
+            }
+
+            if(additionalData) {
+                data["additionalData"] = additionalData
             }
 
             if(pointId) {

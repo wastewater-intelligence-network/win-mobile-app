@@ -97,7 +97,7 @@ export default function Home({navigation}) {
                         key={10*idx + rIdx}
                         style={styles.taskBox}
                         underlayColor="#ddd"
-                        onPress={() => {navigation.navigate("QRScanner")}}
+                        onPress={() => {navigation.navigate("SampleCollector")}}
                     >
                         <>
                             <Image

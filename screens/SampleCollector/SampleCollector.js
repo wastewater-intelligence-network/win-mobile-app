@@ -19,7 +19,7 @@ import BarcodeMask from 'react-native-barcode-mask';
 import Constants from '../constants';
 import SampleTracking from '../../controllers/sample_tracking';
 
-export default function QRScanner() {
+export default function SampleCollector() {
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(true);
 	const [locationPermissionVisible, setLocationPermissionVisible] = useState(false);
@@ -28,6 +28,10 @@ export default function QRScanner() {
 	const [listOverlayVisible, setListOverlayVisible] = useState(false);
 	const [qrData, setQrData] = useState(undefined);
 	const [collectionPointList, setCollectionPointList] = useState(undefined);
+
+	const [phValue, setPhValue] = useState(undefined)
+	const [temperatureValue, setTemparatureValue] = useState(undefined)
+	const [inflowValue, setInflowValue] = useState(undefined)
 
 	var screenWidth = Dimensions.get('window').width; //full width
 	var screenHeight = Dimensions.get('window').height; //full height
@@ -91,13 +95,27 @@ export default function QRScanner() {
 		// )
 	};
 
+	const validateFloatAndSet = (type, value) => {
+		
+	}
+
 	const handleSampleDataSubmit = (pointId) => {
 		if(sampleDataOverlayVisible) {
 			toggleOverlay('sampleDataOverlay')
 		}
+
+		let additionalData
+		
+		if(phValue !== undefined || temperatureValue !== undefined || inflowValue !== undefined) {
+			additionalData = {
+				'ph': phValue,
+				'temperature': temperatureValue,
+				'inflow': inflowValue
+			}
+		}
 		
 		var s = new SampleTracking()
-		s.sampleCollected(location, qrData, pointId)
+		s.sampleCollected(location, qrData, pointId, additionalData)
 			.then((res) => {
 				if(res.status === 501) {
 					setCollectionPointList(res.list)
@@ -145,6 +163,7 @@ export default function QRScanner() {
 			collectionPointList.forEach((point, idx) => {
 				list.push(
 					<TouchableHighlight
+						key={idx}
 						style={styles.pointListItemContainer}
 						underlayColor={Constants.colors.primaryDark}
 						onPress={() => {
@@ -195,6 +214,7 @@ export default function QRScanner() {
 						selectionColor="#756BDE"
 						autoCapitalize='none'
 						keyboardType='decimal-pad'
+						onChangeText={setPhValue}
 					/>
 					<TextInput
 						style={styles.sampleDataInput}
@@ -202,6 +222,7 @@ export default function QRScanner() {
 						selectionColor="#756BDE"
 						autoCapitalize='none'
 						keyboardType='decimal-pad'
+						onChangeText={setTemparatureValue}
 					/>
 					<TextInput
 						style={styles.sampleDataInput}
@@ -209,6 +230,7 @@ export default function QRScanner() {
 						selectionColor="#756BDE"
 						autoCapitalize='none'
 						keyboardType='decimal-pad'
+						onChangeText={setInflowValue}
 					/>
 					<TouchableHighlight 
 						style={styles.button}

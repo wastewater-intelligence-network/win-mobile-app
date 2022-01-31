@@ -5,7 +5,7 @@ import { useFonts } from 'expo-font';
 
 import Login from './screens/Login/Login';
 import Home from './screens/Home/Home';
-import QRScanner from './screens/QRScanner/QRScanner';
+import SampleCollector from './screens/SampleCollector/SampleCollector';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,8 +33,8 @@ export default function App() {
 					options={{headerShown: false}}
 				/>
 				<Stack.Screen
-					name="QRScanner"
-					component={QRScanner}
+					name="SampleCollector"
+					component={SampleCollector}
 					options={{headerShown: false}}
 				/>
 			</Stack.Navigator>
