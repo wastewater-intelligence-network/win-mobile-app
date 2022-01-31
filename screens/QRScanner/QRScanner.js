@@ -5,7 +5,10 @@ import {
 	StyleSheet, 
 	Button, 
 	Dimensions,
-	Alert
+	Alert,
+	ActivityIndicator,
+	TextInput,
+	TouchableHighlight
 } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as Location from 'expo-location';
@@ -13,14 +16,18 @@ import { Overlay } from 'react-native-elements';
 // import { RNCamera } from 'react-native-camera';
 import BarcodeMask from 'react-native-barcode-mask';
 
+import Constants from '../constants';
 import SampleTracking from '../../controllers/sample_tracking';
 
 export default function QRScanner() {
     const [hasPermission, setHasPermission] = useState(null);
-    const [scanned, setScanned] = useState(false);
-	const [visible, setVisible] = useState(false);
+    const [scanned, setScanned] = useState(true);
+	const [locationPermissionVisible, setLocationPermissionVisible] = useState(false);
 	const [location, setLocation] = useState(undefined);
-    const [text, setText] = useState('Not yet scanned')
+	const [sampleDataOverlayVisible, setSampleDataOverlayVisible] = useState(false);
+	const [listOverlayVisible, setListOverlayVisible] = useState(false);
+	const [qrData, setQrData] = useState(undefined);
+	const [collectionPointList, setCollectionPointList] = useState(undefined);
 
 	var screenWidth = Dimensions.get('window').width; //full width
 	var screenHeight = Dimensions.get('window').height; //full height
@@ -41,6 +48,7 @@ export default function QRScanner() {
 	  
 			let l = await Location.getCurrentPositionAsync({});
 			setLocation(l)
+			setScanned(false)
 			console.log(l)
 		})();
 	}
@@ -51,42 +59,68 @@ export default function QRScanner() {
 		getLocation();
 	}, []);
 
-	const toggleOverlay = () => {
-		setVisible(!visible);
+	const toggleOverlay = (overlay) => {
+		if(overlay === 'locationPermissionOverlay') {
+			setLocationPermissionVisible(!locationPermissionVisible)
+		} else if(overlay === 'sampleDataOverlay') {
+			setSampleDataOverlayVisible(!sampleDataOverlayVisible)
+		} else if(overlay === 'listOverlay') {
+			setListOverlayVisible(!listOverlayVisible)
+		}
 	};
 
 	// What happens when we scan the bar code
 	const handleBarCodeScanned = ({ type, data }) => {
-		setScanned(true);
-		setText(data)
-		console.log('Type: ' + type + '\nData: ' + data)
-		// toggleOverlay()
+		setScanned(true)
+		setQrData(data)
+
+		toggleOverlay('sampleDataOverlay')
+
+		// Alert.alert(
+		// 	"New Sample Collected",
+		// 	"Collected sample for container " + data,
+		// 	[
+		// 		{
+		// 			text: "Yes",
+		// 			onPress: () => setScanned(false)
+		// 		}, {
+		// 			text: "No",
+		// 			onPress: () => setScanned(false)
+		// 		}
+		// 	]
+		// )
+	};
+
+	const handleSampleDataSubmit = (pointId) => {
+		if(sampleDataOverlayVisible) {
+			toggleOverlay('sampleDataOverlay')
+		}
 		
 		var s = new SampleTracking()
-		s.sampleCollected(location, data)
-			.then(res => {
-				if(res.status !== 200) {
-					alert(res.message)
+		s.sampleCollected(location, qrData, pointId)
+			.then((res) => {
+				if(res.status === 501) {
+					setCollectionPointList(res.list)
+					toggleOverlay('listOverlay')
+					return
+				} else if(res.status !== 200) {
+					Alert.alert("Issue with sample collection", res.message, [
+						{
+							title: 'Ok',
+							onPress: () => { setScanned(false) }
+						}
+					])
 				} else {
-					
+					Alert.alert("Successful", res.message, [
+						{
+							title: 'Ok',
+							onPress: () => { setScanned(false) }
+						}
+					])
 				}
 			})
 			.catch(err => console.log(err))
-
-		Alert.alert(
-			"New Sample Collected",
-			"Collected sample for container " + data,
-			[
-				{
-					text: "Yes",
-					onPress: () => setScanned(false)
-				}, {
-					text: "No",
-					onPress: () => setScanned(false)
-				}
-			]
-		)
-	};
+	}
 
 	// Check permissions and return the screens
 	if (hasPermission === null) {
@@ -105,9 +139,37 @@ export default function QRScanner() {
 		)
 	}
 
+	const renderCollectionPointList = () => {
+		if(collectionPointList !== undefined) {
+			let list = []
+			collectionPointList.forEach((point, idx) => {
+				list.push(
+					<TouchableHighlight
+						style={styles.pointListItemContainer}
+						underlayColor={Constants.colors.primaryDark}
+						onPress={() => {
+							handleSampleDataSubmit(point.pointId)
+							toggleOverlay('listOverlay')
+						}}	
+					>
+						<Text 
+							key={idx}
+							style={styles.pointListItem}
+						>
+							{point.name}
+						</Text>
+					</TouchableHighlight>
+				)
+			})
+			return list
+		}
+		
+	}
+
 	// Return the View
 	return (
 			<View style={styles.container}>
+				
 				<View style={styles.barcodebox}>
 					<BarCodeScanner
 						onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
@@ -117,14 +179,55 @@ export default function QRScanner() {
 						width={300} height={300} showAnimatedLine={false} outerMaskOpacity={0.9}
 					/>
 				</View>
-				<Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
-					<Text style={styles.textPrimary}>
-						Sample Collected
-					</Text>
-					<Text style={styles.textSecondary}>
-						Welcome to React Native Elements
-					</Text>
+				<Overlay isVisible={location === undefined}>
+					<ActivityIndicator size="large" color="#0000ff" />
+					<Text>Getting your location</Text>
 				</Overlay>
+				<Overlay
+				 	style={styles.sampleDataOverlay}
+					isVisible={sampleDataOverlayVisible} 
+					onBackdropPress={() => {toggleOverlay('sampleDataOverlay'); setScanned(false)}}
+				>
+					<Text style={styles.sampleDataHeading}>Additional Data</Text>
+					<TextInput
+						style={styles.sampleDataInput}
+						placeholder='pH Value'
+						selectionColor="#756BDE"
+						autoCapitalize='none'
+						keyboardType='decimal-pad'
+					/>
+					<TextInput
+						style={styles.sampleDataInput}
+						placeholder='Temperature'
+						selectionColor="#756BDE"
+						autoCapitalize='none'
+						keyboardType='decimal-pad'
+					/>
+					<TextInput
+						style={styles.sampleDataInput}
+						placeholder='Inflow'
+						selectionColor="#756BDE"
+						autoCapitalize='none'
+						keyboardType='decimal-pad'
+					/>
+					<TouchableHighlight 
+						style={styles.button}
+						underlayColor={Constants.colors.primaryDark}
+						onPress={() => {handleSampleDataSubmit(undefined)}}
+					>
+						<Text style={styles.buttonText}>Submit</Text>
+					</TouchableHighlight>
+				</Overlay>
+
+				<Overlay
+				 	style={styles.sampleDataOverlay}
+					isVisible={listOverlayVisible} 
+					onBackdropPress={() => {toggleOverlay('listOverlay'); setScanned(false)}}
+				>
+					<Text style={styles.pointListHeading}>Multiple collection points nearby. Please pick one</Text>
+					{renderCollectionPointList()}
+				</Overlay>
+				
 				{/* <View style={styles.result}>
 					<Text style={styles.maintext}>{text}</Text>
 					{scanned && <Button style={styles.againbutton} title={'Scan again?'} onPress={() => setScanned(false)} color='tomato' />}
@@ -164,5 +267,42 @@ const styles = StyleSheet.create({
 	result: {
 		paddingHorizontal: 50,
 		paddingVertical: 20   
+	},
+	sampleDataOverlay: {
+		padding: 20
+	},
+	sampleDataHeading: {
+		fontSize: 20,
+		paddingHorizontal: 30
+	},
+	sampleDataInput: {
+		margin: 5,
+		padding: 10,
+		backgroundColor: '#eee'
+	},
+	button: {
+		marginVertical: 5,
+		alignItems: "center",
+		backgroundColor: "#756BDE",
+		padding: 10
+	},
+	buttonText: {
+		fontSize: 15,
+		fontWeight: 'bold',
+		color: "#fff",
+	},
+	pointListHeading: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		marginVertical: 10
+	},
+	pointListItemContainer: {
+		backgroundColor: Constants.colors.primary,
+		marginVertical: 10
+	},
+	pointListItem: {
+		fontSize: 14,
+		padding: 15,
+		color: '#fff'
 	}
 });
