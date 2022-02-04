@@ -76,42 +76,42 @@ export default function SampleList() {
 	}
 
 	const getStatusResponse = (status) => {
-		if(status === 'sample_collected') {
+		if(status === Constants.status.sampleCollected) {
 			return {
 				long: 'Sample collected',
 				short: 'Sample\nCollected',
 				icon: SampleCollectionIcon,
 				color: '#0020b8'
 			}
-		} else if(status === 'sample_in_transit') {
+		} else if(status === Constants.status.sampleInTransit) {
 			return {
 				long: 'Sample in transit',
 				short: 'Sample\nOnRoute',
 				icon: SampleInTransitIcon,
 				color: '#584174'
 			}
-		} else if(status === 'sample_received_in_lab') {
+		} else if(status === Constants.status.sampleReceivedInLab) {
 			return {
 				long: 'Sample in lab',
 				short: 'Sample\nReceived',
 				icon: SampleInLabIcon,
 				color: '#356934'
 			}
-		} else if(status === 'sample_test_in_progress') {
+		} /* else if(status === Constants.status.sampleTestInProgress) {
 			return {
 				long: 'Sample in lab',
 				short: 'Sample\nReceived',
 				icon: SampleCollectionIcon,
 				color: '#0020b8'
 			}
-		} else if(status === 'sample_result_out') {
+		} else if(status === Constants.status.sampleResultOut) {
 			return {
 				long: 'Sample in lab',
 				short: 'Sample\nReceived',
 				icon: SampleCollectionIcon,
 				color: '#0020b8'
 			}
-		}
+		} */
 	}
 
 	const renderDetailedStatus = (statusList) => {

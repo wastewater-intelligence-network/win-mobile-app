@@ -9,6 +9,13 @@ var Constants = {
         SampleTransporter: 'SampleTransporter',
         SampleAcceptance: 'SampleAcceptance',
         SamplesList: 'SamplesList'
+    },
+    status: {
+        sampleCollected: 'sample_collected',
+        sampleInTransit: 'sample_in_transit',
+        sampleReceivedInLab: 'sample_received_in_lab',
+        sampleTestInProgress: 'sample_test_in_progress',
+        sampleResultOut: 'sample_result_out'
     }
 }
 
