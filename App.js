@@ -6,12 +6,21 @@ import { useFonts } from 'expo-font';
 import Login from './screens/Login/Login';
 import Home from './screens/Home/Home';
 import SampleCollector from './screens/SampleCollector/SampleCollector';
+import SampleTransporter from './screens/SampleTransporter/SampleTransporter';
+import SampleList from './screens/SampleList/SampleList';
+
+import Constants from './screens/constants';
+
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
 	const [loaded] = useFonts({
+		QuicksandLight: require('./assets/fonts/Quicksand-Light.ttf'),
 		Quicksand: require('./assets/fonts/Quicksand-Regular.ttf'),
+		QuicksandMedium: require('./assets/fonts/Quicksand-Medium.ttf'),
+		QuicksandBold: require('./assets/fonts/Quicksand-Bold.ttf'),
+		Consolas: require('./assets/fonts/Consolas.ttf'),
 	});
 	
 
@@ -33,8 +42,23 @@ export default function App() {
 					options={{headerShown: false}}
 				/>
 				<Stack.Screen
-					name="SampleCollector"
+					name={Constants.screenName.SampleCollector}
 					component={SampleCollector}
+					options={{headerShown: false}}
+				/>
+				<Stack.Screen
+					name={Constants.screenName.SampleTransporter}
+					component={SampleTransporter}
+					options={{headerShown: false}}
+				/>
+				<Stack.Screen
+					name={Constants.screenName.SampleAcceptance}
+					component={SampleTransporter}
+					options={{headerShown: false}}
+				/>
+				<Stack.Screen
+					name={Constants.screenName.SamplesList}
+					component={SampleList}
 					options={{headerShown: false}}
 				/>
 			</Stack.Navigator>

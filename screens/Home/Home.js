@@ -15,6 +15,7 @@ import SampleCollectionIcon from '../../assets/safety-suit.png';
 import TransporterIcon from '../../assets/delivery-man.png';
 import LabAcceptanceIcon from '../../assets/parcel.png';
 import LabTestIcon from '../../assets/medical-lab.png';
+import ListIcon from '../../assets/task-list.png';
 
 export default function Home({navigation}) {
 
@@ -67,24 +68,33 @@ export default function Home({navigation}) {
         "collector": [
             {
                 "text": "Sample\nCollection",
-                "icon": SampleCollectionIcon
+                "icon": SampleCollectionIcon,
+                "navigate": Constants.screenName.SampleCollector
             }
         ],
         "transporter": [
             {
                 "text": "Sample\nTransportation",
-                "icon": TransporterIcon
+                "icon": TransporterIcon,
+                "navigate": Constants.screenName.SampleTransporter
             }
         ],
         "technician": [
             {
                 "text": "Accept\nSample",
-                "icon": LabAcceptanceIcon
+                "icon": LabAcceptanceIcon,
+                "navigate": Constants.screenName.SampleAcceptance
             },
             {
-                "text": "Finish\nTest",
-                "icon": LabTestIcon
-            }
+                "text": "Samples\nList",
+                "icon": ListIcon,
+                "navigate": Constants.screenName.SamplesList
+            },
+            // {
+            //     "text": "Finish\nTest",
+            //     "icon": LabTestIcon,
+            //     "navigate": undefined
+            // }
         ]
     }
 
@@ -97,7 +107,7 @@ export default function Home({navigation}) {
                         key={10*idx + rIdx}
                         style={styles.taskBox}
                         underlayColor="#ddd"
-                        onPress={() => {navigation.navigate("SampleCollector")}}
+                        onPress={() => {navigation.navigate(r.navigate)}}
                     >
                         <>
                             <Image

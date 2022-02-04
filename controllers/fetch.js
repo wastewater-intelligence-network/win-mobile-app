@@ -1,6 +1,6 @@
 import Authentication from "./authentication"
 
-const WIN_API_ENDPOINT = 'http://192.168.0.107:8080'
+const WIN_API_ENDPOINT = 'http://192.168.0.105:8080'
 
 export default function Fetch(resource, init) {
     var auth = new Authentication()
