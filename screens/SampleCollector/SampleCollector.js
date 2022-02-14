@@ -17,9 +17,10 @@ import { Overlay } from 'react-native-elements';
 import BarcodeMask from 'react-native-barcode-mask';
 
 import Constants from '../constants';
+import WinCustomAlert from '../WinCustomAlert';
 import SampleTracking from '../../controllers/sample_tracking';
 
-export default function SampleCollector() {
+export default function SampleCollector({ navigation }) {
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(true);
 	const [locationPermissionVisible, setLocationPermissionVisible] = useState(false);
@@ -32,6 +33,10 @@ export default function SampleCollector() {
 	const [phValue, setPhValue] = useState(undefined)
 	const [temperatureValue, setTemparatureValue] = useState(undefined)
 	const [inflowValue, setInflowValue] = useState(undefined)
+
+	const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+	const [showErrPopup, setShowErrPopup] = useState(false);
+
 
 	var screenWidth = Dimensions.get('window').width; //full width
 	var screenHeight = Dimensions.get('window').height; //full height
@@ -75,8 +80,10 @@ export default function SampleCollector() {
 
 	// What happens when we scan the bar code
 	const handleBarCodeScanned = ({ type, data }) => {
+
 		setScanned(true)
 		setQrData(data)
+		console.log(`${Constants.debugDesc.text} comes inside scanned qrcode=${qrData}`);
 
 		toggleOverlay('sampleDataOverlay')
 
@@ -99,7 +106,18 @@ export default function SampleCollector() {
 		
 	}
 
+	const errorAction = () => {
+		setScanned(false);
+	}
+
+	const saveToDB = () => {
+		setScanned(true) 
+		navigation.goBack();
+	}
+
 	const handleSampleDataSubmit = (pointId) => {
+		console.log(`${Constants.debugDesc.text} handle additional data with point id=${pointId}`);
+
 		if(sampleDataOverlayVisible) {
 			toggleOverlay('sampleDataOverlay')
 		}
@@ -113,28 +131,42 @@ export default function SampleCollector() {
 				'inflow': inflowValue
 			}
 		}
+		console.log(`${Constants.debugDesc.text} after adding additional = ${additionalData} qrcode=${qrData}`);
+
 		
 		var s = new SampleTracking()
-		s.sampleCollected(location, qrData, pointId, additionalData)
+		s.sampleCollected(location, qrData, pointId, additionalData, navigation)
 			.then((res) => {
+				console.log(`${Constants.debugDesc.text} response after adding = ${res} with status=${res.status}`);
 				if(res.status === 501) {
 					setCollectionPointList(res.list)
 					toggleOverlay('listOverlay')
 					return
 				} else if(res.status !== 200) {
-					Alert.alert("Issue with sample collection", res.message, [
-						{
-							title: 'Ok',
-							onPress: () => { setScanned(false) }
-						}
-					])
+					// Alert.alert("Issue with sample collection", res.message, [
+					// 	{
+					// 		title: 'Ok',
+					// 		onPress: () => { 
+					// 			setScanned(false);//here was false
+					// 			setShowErrPopup(true);
+					// 		 }
+					// 	}						
+					// ])
+					setShowErrPopup(true);
+
+
 				} else {
-					Alert.alert("Successful", res.message, [
-						{
-							title: 'Ok',
-							onPress: () => { setScanned(false) }
-						}
-					])
+					// Alert.alert("Successful", res.message, [
+					// 	{
+					// 		title: 'Ok',
+					// 		onPress: () => {
+					// 			setScanned(true) 
+					// 			navigation.goBack();
+					// 			}
+					// 	}
+					// ])
+
+					setShowSuccessPopup(true)
 				}
 			})
 			.catch(err => console.log(err))
@@ -250,10 +282,21 @@ export default function SampleCollector() {
 					{renderCollectionPointList()}
 				</Overlay>
 				
-				{/* <View style={styles.result}>
-					<Text style={styles.maintext}>{text}</Text>
-					{scanned && <Button style={styles.againbutton} title={'Scan again?'} onPress={() => setScanned(false)} color='tomato' />}
-				</View> */}
+				<WinCustomAlert
+						displayMode={'success'}
+						displayMsg={'Save successfull'}
+						visibility={showSuccessPopup}
+						dismissAlert={setShowSuccessPopup}
+						onPressHandler = {() => saveToDB()}
+					/>
+				<WinCustomAlert
+					displayMode={'failed'}
+					displayMsg={'Record with container id\n or collection point exist'}
+					visibility={showErrPopup}
+					dismissAlert={setShowErrPopup}
+					onPressHandler = {() => errorAction() }
+				/>
+
 			</View>
 	);
 }

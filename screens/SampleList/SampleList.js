@@ -17,16 +17,18 @@ import Constants from '../constants';
 import SampleCollectionIcon from '../../assets/sample_collection.png';
 import SampleInTransitIcon from '../../assets/transition.png';
 import SampleInLabIcon from '../../assets/sample_accepted.png';
+import Util from "../Util";
 
-export default function SampleList() {
+export default function SampleList({ navigation }) {
 
 	const [sampleList, setSampleList] = useState([])
 
 	useEffect(() => {
 		var date = Date.now()
 		var sampleTracking = new SampleTracking()
-		sampleTracking.getSamplesList('2022-2-4')
+		sampleTracking.getSamplesList(Util.getCurrentDate(), navigation)
 			.then(setSampleList)
+
 	}, [])
 
 	const detailedStatusDefault = [
