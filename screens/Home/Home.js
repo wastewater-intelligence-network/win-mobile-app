@@ -256,7 +256,7 @@ export default function Home({navigation, route}) {
             <View style={styles.taskBoxContainer}>
                 {renderFinalTaskBoxes()}
             </View>
-            <Text style={styles.signout}>Sign Out</Text>
+            {/* <Text style={styles.signout}>Sign Out</Text> */}
 		</View>
 	);
 }
