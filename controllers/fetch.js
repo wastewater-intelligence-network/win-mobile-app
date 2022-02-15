@@ -1,10 +1,10 @@
+import { Alert } from 'react-native';
+
 import Authentication from "./authentication"
+import Constants from '../screens/constants';
+import WinCustomAlert from "../screens/WinCustomAlert";
 
 const WIN_API_ENDPOINT = 'https://win.niua.org:8081'//'http://192.168.0.105:8080'
-
-import Constants from '../screens/constants';
-import { Alert } from 'react-native';
-import WinCustomAlert from "../screens/WinCustomAlert";
 
 export default function Fetch(resource, init, navigation) {
     var auth = new Authentication()
@@ -46,7 +46,17 @@ export default function Fetch(resource, init, navigation) {
             console.log(`${Constants.debugDesc.text} token =${token} `);
 
             fetch(WIN_API_ENDPOINT + resource, init)
-                .then(resolve)
+                .then(res => {
+                    // Check if user is unauthorised and direct to login.
+                    // Case to handle session expiry on the server
+                    if(res.status === 401) {
+                        Alert.alert("Error", "Unauthorised user. Please login again.")
+                        navigation.pop()
+                        navigation.replace(Constants.screenName.Login)
+                    } else {
+                        resolve(res)
+                    }
+                })
                 .catch(reject)
         })
         .catch((reject) =>{
