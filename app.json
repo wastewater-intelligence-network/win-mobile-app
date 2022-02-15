@@ -1,13 +1,14 @@
 {
   "expo": {
-    "name": "WinMobileApp",
+    "name": "Wastewater Intelligence Network",
     "slug": "WinMobileApp",
     "version": "1.0.1",
     "assetBundlePatterns": [
       "**/*"
     ],
     "android": {
-      "package": "com.niua.win"
+      "package": "com.niua.win",
+      "versionCode": 3
     }
   },
   "name": "WinMobileApp"
