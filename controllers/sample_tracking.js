@@ -2,6 +2,7 @@ import Fetch from './fetch';
 
 export default class SampleTracking {
     sampleCollected = (location, containerId, pointId, additionalData, navigation) => {
+        console.log(`location=${location.coords.latitude} ${location.coords.longitude}, containerID=${containerId}, pointID=${pointId}, additionalData=${additionalData.ph} ${additionalData.temperature}${additionalData.inflow}`)
         return new Promise((resolve, reject) => { 
             var data = {
                 "containerId": containerId,

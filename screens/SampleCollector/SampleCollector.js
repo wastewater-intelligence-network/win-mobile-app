@@ -36,6 +36,7 @@ export default function SampleCollector({ navigation }) {
 
 	const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 	const [showErrPopup, setShowErrPopup] = useState(false);
+	const [serverMessage, setServerMessage] = useState('');
 
 
 	var screenWidth = Dimensions.get('window').width; //full width
@@ -123,7 +124,7 @@ export default function SampleCollector({ navigation }) {
 		}
 
 		let additionalData
-		
+		console.log(`ph value=${phValue}, temperature=${temperatureValue}, inflow value=${inflowValue}`);
 		if(phValue !== undefined || temperatureValue !== undefined || inflowValue !== undefined) {
 			additionalData = {
 				'ph': phValue,
@@ -138,34 +139,21 @@ export default function SampleCollector({ navigation }) {
 		s.sampleCollected(location, qrData, pointId, additionalData, navigation)
 			.then((res) => {
 				console.log(`${Constants.debugDesc.text} response after adding = ${res} with status=${res.status}`);
+				console.log(`message globally=${res.message}`);
+
 				if(res.status === 501) {
+					console.log('coming in 501 block')
 					setCollectionPointList(res.list)
 					toggleOverlay('listOverlay')
 					return
 				} else if(res.status !== 200) {
-					// Alert.alert("Issue with sample collection", res.message, [
-					// 	{
-					// 		title: 'Ok',
-					// 		onPress: () => { 
-					// 			setScanned(false);//here was false
-					// 			setShowErrPopup(true);
-					// 		 }
-					// 	}						
-					// ])
+					console.log(`message in not equal to 200=${res.message}`);
+					setServerMessage(res.message)
 					setShowErrPopup(true);
 
-
 				} else {
-					// Alert.alert("Successful", res.message, [
-					// 	{
-					// 		title: 'Ok',
-					// 		onPress: () => {
-					// 			setScanned(true) 
-					// 			navigation.goBack();
-					// 			}
-					// 	}
-					// ])
-
+					console.log(`message in success response${res.message}`);
+					setServerMessage(res.message)
 					setShowSuccessPopup(true)
 				}
 			})
@@ -284,14 +272,14 @@ export default function SampleCollector({ navigation }) {
 				
 				<WinCustomAlert
 						displayMode={'success'}
-						displayMsg={'Save successfull'}
+						displayMsg={serverMessage}
 						visibility={showSuccessPopup}
 						dismissAlert={setShowSuccessPopup}
 						onPressHandler = {() => saveToDB()}
 					/>
 				<WinCustomAlert
 					displayMode={'failed'}
-					displayMsg={'Record with container id\n or collection point exist'}
+					displayMsg={serverMessage}
 					visibility={showErrPopup}
 					dismissAlert={setShowErrPopup}
 					onPressHandler = {() => errorAction() }
