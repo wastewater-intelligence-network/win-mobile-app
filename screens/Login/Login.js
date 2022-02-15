@@ -67,7 +67,7 @@ export default function Login({navigation}) {
 					console.log(`${Constants.debugDesc.text} response=${res.roles}`);
 					var array = res.roles
 					ToastAndroid.showWithGravity("Login Successful", ToastAndroid.SHORT, ToastAndroid.BOTTOM)
-                    navigation.navigate('Home', res.roles)
+					navigation.replace('Home', res.roles)
 				} else {
 					ToastAndroid.show("Could not login. Please check your username and password", ToastAndroid.LONG)
 				}
